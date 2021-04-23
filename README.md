@@ -1,2 +1,2 @@
-# manifestor2020
+# manifestor
 a thing for working on things
