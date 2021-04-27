@@ -232,7 +232,7 @@ namespace acquire
             }
 
             manifestPath = manifestPath ?? Path.Combine(manifestDirectory, "WorkloadManifest.json");
-            var manifest = JsonSerializer.Deserialize<ManifestInformation>(File.ReadAllBytes(manifestPath), new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            var manifest = JsonSerializer.Deserialize<ManifestInformation>(File.ReadAllBytes(manifestPath), new JsonSerializerOptions(JsonSerializerDefaults.Web) { AllowTrailingCommas = true, ReadCommentHandling = JsonCommentHandling.Allow });
             foreach (var item in manifest.Packs)
             {
                 if (Versions.TryGetValue(item.Value.Version, out var packVersion))
@@ -293,13 +293,31 @@ namespace acquire
             return 0;
         }
 
-        private record ManifestInformation(int version, IDictionary<string, WorkloadInformation> Workloads, IDictionary<string, PackVersionInformation> Packs);
-        
-        private record WorkloadInformation(string description, List<string> Packs, List<string> Platforms, List<string> Extends);
+        private record ManifestInformation {
+            public int Version { get; init; }
+            public string Description {get; init; }
+
+            [property: JsonPropertyName("depends-on")]
+            public IDictionary<string, int> DependsOn { get; init; }
+            public IDictionary<string, WorkloadInformation> Workloads { get; init; }
+            public IDictionary<string, PackVersionInformation> Packs { get; init; }
+            public object Data { get; init; }
+        }
+
+        private record WorkloadInformation {
+            public bool Abstract { get; init; }
+            public string Kind { get; init; }
+            public string Description { get; init; }
+
+            public List<string> Packs { get; init; }
+            public List<string> Extends { get; init; }
+            public List<string> Platforms { get; init; }
+
+        }
         
         private record PackVersionInformation {
             public string Kind { get; init; }
-            public string Version { get; set; } 
+            public string Version { get; set; }
             [property: JsonPropertyName("alias-to")]
             public Dictionary<string, string> AliasTo { get; init; }
         }
