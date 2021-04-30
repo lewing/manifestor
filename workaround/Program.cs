@@ -191,7 +191,7 @@ namespace acquire
 ";
             File.WriteAllText(restoreProject, projectFile);
 
-            Console.WriteLine("Restoring...");
+            Console.WriteLine($"Restoring '{Rid}'...");
 
             var process = Process.Start(new ProcessStartInfo
             {
@@ -232,7 +232,7 @@ namespace acquire
             }
 
             manifestPath = manifestPath ?? Path.Combine(manifestDirectory, "WorkloadManifest.json");
-            var manifest = JsonSerializer.Deserialize<ManifestInformation>(File.ReadAllBytes(manifestPath), new JsonSerializerOptions(JsonSerializerDefaults.Web) { AllowTrailingCommas = true, ReadCommentHandling = JsonCommentHandling.Allow });
+            var manifest = JsonSerializer.Deserialize<ManifestInformation>(File.ReadAllBytes(manifestPath), new JsonSerializerOptions(JsonSerializerDefaults.Web) { AllowTrailingCommas = true, ReadCommentHandling = JsonCommentHandling.Skip });
             foreach (var item in manifest.Packs)
             {
                 if (Versions.TryGetValue(item.Value.Version, out var packVersion))
@@ -294,11 +294,11 @@ namespace acquire
         }
 
         private record ManifestInformation {
-            public int Version { get; init; }
+            public object Version { get; init; }
             public string Description {get; init; }
 
             [property: JsonPropertyName("depends-on")]
-            public IDictionary<string, int> DependsOn { get; init; }
+            public IDictionary<string, object> DependsOn { get; init; }
             public IDictionary<string, WorkloadInformation> Workloads { get; init; }
             public IDictionary<string, PackVersionInformation> Packs { get; init; }
             public object Data { get; init; }
